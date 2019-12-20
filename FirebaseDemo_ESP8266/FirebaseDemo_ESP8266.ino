@@ -15,6 +15,12 @@
 void setup() {
   Serial.begin(9600);
 
+
+  
+  pinMode(D1, INPUT); // Setup for leads off detection LO +
+  pinMode(D2, INPUT); // Setup for leads off detection LO -
+
+
   // connect to wifi.
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("connecting");
@@ -31,17 +37,23 @@ void setup() {
 
 int val;
 String message="";
-float frequency=256;
-float seconds_no=2;
-float Samples_per_word=frequency*seconds_no;
-float Delay=1/frequency;
 
 void loop() {
-  for (int i =0; i<Samples_per_word;i++)
+  for (int i =0; i<512;i++)
   {
-   val=analogRead(A0);
-   message+=String(val)+String(',');
-   delay(Delay);
+/*
+    if((digitalRead(D1) == 1)||(digitalRead(D2) == 1))
+    {
+     message+=String('!')+String(',');
+    }
+    else
+    {*/
+    // send the value of analog input 0:
+    val=analogRead(A0);
+    Serial.println(val);
+    message+=String(val)+String(',');
+  //  }
+   delay(4);
    }
   
   Firebase.pushString("message", message);
