@@ -29,28 +29,39 @@ void setup() {
   Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
 }
 
-int val;
-String message="";
-float frequency=256;
-float seconds_no=2;
-float Samples_per_word=frequency*seconds_no;
-float Delay=1/frequency;
+int n = 0;
 
 void loop() {
-  for (int i =0; i<Samples_per_word;i++)
-  {
-   val=analogRead(A0);
-   message+=String(val)+String(',');
-   delay(Delay);
-   }
+  // set value
+  int arr[4]={1,2,3,4};
+  Firebase.pushArray("number", arr);
+  // handle error
+  if (Firebase.failed()) {
+      Serial.print("setting /number failed:");
+      Serial.println(Firebase.error());  
+      return;
+  }
   
-  Firebase.pushString("message", message);
+  // set string value
+  Firebase.setString("message", "hello world");
   // handle error
   if (Firebase.failed()) {
       Serial.print("setting /message failed:");
       Serial.println(Firebase.error());  
       return;
   }
-  message="";
+  delay(1000);
   
+
+  // append a new value to /logs
+  String name = Firebase.pushInt("logs", n++);
+  // handle error
+  if (Firebase.failed()) {
+      Serial.print("pushing /logs failed:");
+      Serial.println(Firebase.error());  
+      return;
+  }
+  Serial.print("pushed: /logs/");
+  Serial.println(name);
+  delay(1000);
 }
