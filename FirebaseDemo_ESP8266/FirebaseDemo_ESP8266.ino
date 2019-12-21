@@ -15,12 +15,6 @@
 void setup() {
   Serial.begin(9600);
 
-
-  
-  pinMode(D1, INPUT); // Setup for leads off detection LO +
-  pinMode(D2, INPUT); // Setup for leads off detection LO -
-
-
   // connect to wifi.
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("connecting");
@@ -35,34 +29,67 @@ void setup() {
   Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
 }
 
-int val;
-String message="";
+int n = 0;
 
 void loop() {
-  for (int i =0; i<512;i++)
-  {
-/*
-    if((digitalRead(D1) == 1)||(digitalRead(D2) == 1))
-    {
-     message+=String('!')+String(',');
-    }
-    else
-    {*/
-    // send the value of analog input 0:
-    val=analogRead(A0);
-    Serial.println(val);
-    message+=String(val)+String(',');
-  //  }
-   delay(4);
-   }
+  // set value
+  Firebase.setFloat("number", 42.0);
+  // handle error
+  if (Firebase.failed()) {
+      Serial.print("setting /number failed:");
+      Serial.println(Firebase.error());  
+      return;
+  }
+  delay(1000);
   
-  Firebase.pushString("message", message);
+  // update value
+  Firebase.setFloat("number", 43.0);
+  // handle error
+  if (Firebase.failed()) {
+      Serial.print("setting /number failed:");
+      Serial.println(Firebase.error());  
+      return;
+  }
+  delay(1000);
+
+  // get value 
+  Serial.print("number: ");
+  Serial.println(Firebase.getFloat("number"));
+  delay(1000);
+
+  // remove value
+  Firebase.remove("number");
+  delay(1000);
+
+  // set string value
+  Firebase.setString("message", "hello world");
   // handle error
   if (Firebase.failed()) {
       Serial.print("setting /message failed:");
       Serial.println(Firebase.error());  
       return;
   }
-  message="";
+  delay(1000);
   
+  // set bool value
+  Firebase.setBool("truth", false);
+  // handle error
+  if (Firebase.failed()) {
+      Serial.print("setting /truth failed:");
+      Serial.println(Firebase.error());  
+      return;
+  }
+  delay(1000);
+
+  // append a new value to /logs
+  String name = Firebase.pushInt("logs", n++);
+  // handle error
+  if (Firebase.failed()) {
+      Serial.print("pushing /logs failed:");
+      Serial.println(Firebase.error());  
+      return;
+  }
+  Serial.print("pushed: /logs/");
+  Serial.println(name);
+  delay(1000);
 }
